@@ -5,7 +5,10 @@ on:
     - cron: '0 0 * * 0'  # Once a week, Sunday
   push:
     branches:
-      - main
+      - master
+      - develop
+      - gh-pages
+  workflow_dispatch:
 
 jobs:
   update:
