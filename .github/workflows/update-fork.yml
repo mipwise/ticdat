@@ -1,0 +1,44 @@
+name: Update Fork
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Once a week, Sunday
+  push:
+    branches:
+      - main
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Add upstream
+        run: git remote add upstream https://github.com/ticdat/ticdat.git
+
+      - name: Fetch upstream
+        run: git fetch upstream --tags
+
+      - name: Update branches
+        run: |
+          BRANCHES=("master" "develop" "gh-pages")
+          for BRANCH in "${BRANCHES[@]}"; do
+            git checkout $BRANCH
+            git merge upstream/$BRANCH || true  # Continue if has conflict
+            git push origin $BRANCH
+          done
+
+      - name: Sync tags
+        run: |
+          git fetch upstream --tags
+          TAGS=$(git tag -l)
+          for TAG in $TAGS; do
+            git push origin $TAG
+          done
